@@ -1,29 +1,38 @@
 package com.mvc.demo;
 
-import java.io.IOException;
 import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.filter.DelegatingFilterProxy;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.JstlView;
 
 
 @Configuration
 @EnableTransactionManagement
 @EnableAutoConfiguration
 @EnableJpaRepositories(basePackages = "com.mvc.demo")
+@ComponentScan({ "com.mvc.demo*" })
+@EnableWebMvc
+@Import(value = { SecurityConfig.class })
 public class Config {
 	
 	@Bean
@@ -59,6 +68,20 @@ public class Config {
 		return new PersistenceExceptionTranslationPostProcessor();
 	}
 	
+	@Bean(name = "multipartResolver")
+    public CommonsMultipartResolver multiPartResolver() {
+		return new CommonsMultipartResolver();
+	}
+	
+	@Bean
+	public InternalResourceViewResolver viewResolver() {
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
+		viewResolver.setViewClass(JstlView.class);
+		viewResolver.setPrefix("/WEB-INF/views/");
+		viewResolver.setSuffix(".jsp");
+		return viewResolver;
+	}
+	
 	Properties additionalProperties() { 
 		Properties properties = new Properties(); 
 		properties.setProperty("hibernate.hbm2ddl.auto", "validate");
@@ -68,6 +91,7 @@ public class Config {
 		properties.setProperty("hibernate.jdbc.batch_size", "2"); 
 		return properties;
 	}
-
 	
+	
+
 }

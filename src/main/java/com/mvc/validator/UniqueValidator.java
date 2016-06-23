@@ -1,9 +1,11 @@
 package com.mvc.validator;
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import org.hibernate.SessionFactory;
@@ -14,8 +16,7 @@ import org.springframework.orm.hibernate3.HibernateTemplate;
 public class UniqueValidator implements ConstraintValidator<Unique, Serializable> {
  
 	@Autowired 
-	EntityManagerFactory emf;
-	EntityManager entityManager;
+	DataSource dataSource;
  
     private String entityName;
     private String uniqueField;
@@ -24,7 +25,6 @@ public class UniqueValidator implements ConstraintValidator<Unique, Serializable
     public void initialize(Unique unique) {
         entityName = unique.entityName();
         uniqueField = unique.uniqueField();
-        entityManager = emf.createEntityManager();
     }
  
     
@@ -32,11 +32,13 @@ public class UniqueValidator implements ConstraintValidator<Unique, Serializable
     	
         String query = String.format("select %s from %s where %s = '%s' ", 
         		uniqueField, entityName, uniqueField, property);
-        System.out.println(query);
-        //List<?> list = hibernateTemplate.find(query, property);
-        List<Object> list = entityManager.createNativeQuery(query).getResultList();
  
-        return list != null && list.size() > 0;
+        try {
+			return !dataSource.getConnection().createStatement().executeQuery(query).next();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+        return false;
     }
     
 }

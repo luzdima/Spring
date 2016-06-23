@@ -22,7 +22,7 @@
 	<h1 align = "center">New Category</h1>
 	<br />
 	
-	<div style="margin:0 0 0 10px; width:100%"><a href="/555/categories" >back to Categories</a></div>
+	<div style="margin:0 0 0 10px; width:100%"><a href="../categories" >back to Categories</a></div>
 	<br />
 	<br />
 	<br />

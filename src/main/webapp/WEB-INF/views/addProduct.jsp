@@ -25,12 +25,12 @@
 	<h1 align = "center">New Product</h1>
 	<br />
 	
-	<div style="margin:0 0 0 10px; width:100%"><a href="/555/products" >back to Products</a></div>
+	<div style="margin:0 0 0 10px; width:100%"><a href="../products" >back to Products</a></div>
 	<br />
 	<br />
 	<br />
 
-	<form:form method="POST" action="add">
+	<form:form method="POST" action="add" enctype="multipart/form-data">
 		<table align="left" style="margin:0 0 0 20px;">
 			<tr>
 				<td>Name*</td>
@@ -45,7 +45,11 @@
 			</tr>
 			<tr>
 				<td>Image</td>
-				<td><input type="file" name="description" value="${product.description}"  style="width:100%"/>
+				<td><input type="file" name="file" value="${product.image}"  style="width:100%"/></td>
+				<td>
+					<c:if test="${fileError == true}">
+						<div style="color:red">file must be image</div>
+					</c:if>
 				</td>
 			</tr>
 			<tr>

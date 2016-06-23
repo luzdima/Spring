@@ -13,12 +13,24 @@
 	.leftAlign {
 		margin:0 auto; text-align:left;
 	}
+	.rightAlign {
+		margin:0 auto; text-align:right;
+	}
 </style>
 	
 <body align="center">
-	<div class="leftAlign">
-		<div style="margin:10 0 10;" >
-			<a href="/555/products">to Products</a>
+
+	<div style="display:table; width:100%;">
+		<div class="leftAlign" style="width:50%; display:table-cell;">
+			<div style="margin:10 auto auto 10;" >
+				<a href="products">to Products</a>
+			</div>
+		</div>
+		<div class="rightAlign"  style="width:50%; display:table-cell;">
+			<div style="margin:10 10 auto aauto;" >
+				Hi, ${pageContext.request.userPrincipal.name} | 
+				<a href="login?logout">Logout</a>
+			</div>
 		</div>
 	</div>
 	
@@ -29,7 +41,7 @@
 	<br/>
 		
 	<div style="margin:10 0 10;" class="leftAlign">
-		<a href="/555/categories/add">Add Category</a>
+		<a href="categories/add">Add Category</a>
 	</div>
 	<br />
 	
@@ -70,7 +82,7 @@
 					<td align="center">
 						<c:choose>
 							<c:when test="${updateId != item.categoryId}" >
-								<form:form method="GET" action="/555/categories">
+								<form:form method="GET" action="categories">
 									<input type="hidden" name="id" value="${item.categoryId}" /> 
 									<input type="submit" value="Update" /> 
 								</form:form> 

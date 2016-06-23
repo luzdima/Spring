@@ -39,7 +39,7 @@ public class Category implements Serializable {
 
 	@Column(length=200)
 	@NotBlank(message = "must be not empty")
-	@Unique(entity=Category.class, property = "", entityName = "categories", uniqueField = "name")
+	//@Unique(entity=Category.class, property = "", entityName = "categories", uniqueField = "name")
 	private String name;
 
 	//bi-directional many-to-one association to Product

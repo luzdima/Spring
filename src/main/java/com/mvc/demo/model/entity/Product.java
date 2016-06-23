@@ -33,6 +33,9 @@ public class Product implements Serializable {
 
 	@Column(name = "price")
 	private double price;
+	
+	@Column(name="image")
+	private byte[] image;
 
 	//bi-directional many-to-one association to Category
 	@ManyToOne
@@ -74,6 +77,14 @@ public class Product implements Serializable {
 
 	public double getPrice() {
 		return this.price;
+	}
+	
+	public byte[] getImage() {
+		return image;
+	}
+	
+	public void setImage(byte[] image) {
+		this.image = image;
 	}
 
 	public void setPrice(double price) {

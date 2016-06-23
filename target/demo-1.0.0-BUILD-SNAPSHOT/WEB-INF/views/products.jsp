@@ -1,6 +1,7 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -17,6 +18,9 @@
 	}
 	.leftAlign {
 		margin:0 auto; text-align:left;
+	}
+	.rightAlign {
+		margin:0 auto; text-align:right;
 	}
 </style>
 	
@@ -55,28 +59,39 @@
 
 	
 <body width="90%" align="center">
-	
-	<div class="leftAlign">
-		<div style="margin:10 0 10;" >
-			<a href="/555/categories">to Categories</a>
+
+	<div style="display:table; width:100%;">
+		<div class="leftAlign" style="width:50%; display:table-cell;">
+			<div style="margin:10 auto auto 10;" >
+				<a href="categories">to Categories</a>
+			</div>
+		</div>
+		<div class="rightAlign"  style="width:50%; display:table-cell;">
+			<div style="margin:10 10 auto aauto;" >
+				Hi, ${pageContext.request.userPrincipal.name} | 
+				<a href="login?logout">Logout</a>
+			</div>
 		</div>
 	</div>
-	
+		
 	<div>
 		<h1>Products</h1>
 		<br />
 	</div>
 	<br/>
 	
-	<div style="margin:10 0 10;" class="leftAlign">
-		<a href="/555/products/add">Add Product</a>
-	</div>
+	<sec:authorize access="hasRole('ROLE_ADMIN')">
+		<div style="margin:10 0 10;" class="leftAlign">
+			<a href="products/add">Add Product</a>
+		</div>
+	</sec:authorize>
+
 	<br />
 
 	<div text-align="left">
 		<div style="float:left">Select category: </div>
 		<div style="float:left">
-			<form:form method="GET" action="/555/products/"> 
+			<form:form method="GET" action="products/"> 
 				<input type="hidden" name="page" value="0" />
 				<input type="hidden" name="sortDir" value="${param['sortDir']}" />
 				<input type="hidden" name="sortPar" value="${param['sortPar']}" />
@@ -141,27 +156,38 @@
 					</c:choose>
 				</c:if>
 			</th>
-			<th width="5%" text-align="center">Actions</th>
+			<sec:authorize access="hasAnyRole('ROLE_ADMIN')">
+				<th width="5%" text-align="center">Actions</th>
+			</sec:authorize>
 		</tr>
 		<c:forEach items="${productsList}" var="item" varStatus="status"> 
 			<tr>
 				<td>${item.name}</td>
 				<td>${item.category.name}</td>
-				<td align="center"><img src=""></td>
+				<td align="center">
+					<c:choose>
+						<c:when test="${not empty item.image}">
+							<img src="${pageContext.request.contextPath}/products/image?id=${item.productId}" width="200">
+						</c:when>
+						<c:otherwise> No Image </c:otherwise>
+					</c:choose>
+				</td>
 				<td>${item.description}</td>
 				<td>${item.price}</td>
 				<td>${item.count}</td>
-				<td align="center">
-					<form:form method="GET" action="/555/products/update">
-						<input type="hidden" name="id" value="${item.productId}" /> 
-						<input type="submit" value="Update" /> 
-					</form:form>
-					
-					<form:form method="POST" action="/555/products/delete">
-						<input type="hidden" name="id" value="${item.productId}" /> 
-						<input type="submit" value="Delete" /> 
-					</form:form>
-				</td>
+				<sec:authorize access="hasAnyRole('ROLE_ADMIN')">
+					<td align="center">
+						<form:form method="GET" action="products/update">
+							<input type="hidden" name="id" value="${item.productId}" /> 
+							<input type="submit" value="Update" /> 
+						</form:form>
+						
+						<form:form method="POST" action="products/delete">
+							<input type="hidden" name="id" value="${item.productId}" /> 
+							<input type="submit" value="Delete" /> 
+						</form:form>
+					</td>
+				</sec:authorize>
 			</tr>
 		</c:forEach>
 	</table>
@@ -200,7 +226,7 @@
   	
 
 <!-- PAGE LIMIT CHOOSER -->
-	<form:form method="POST" action="/555/products/setLimit" class="leftAlign"> 
+	<form:form method="POST" action="products/setLimit" class="leftAlign"> 
 		limit: 
 		<input type="hidden" name="page" value="0" />
 		<input type="hidden" name="category" value="${selectedCategory}" />

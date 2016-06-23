@@ -1,11 +1,17 @@
 package com.mvc.demo.controller;
 
-import java.util.Collections;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,7 +46,8 @@ public class ProductListController
 	@Autowired
 	private CategoryRepository categoryRepository;
 
-	
+	@Autowired
+	DataSource dataSource;
 	
 	/**
 	 * View to Product List
@@ -52,7 +59,8 @@ public class ProductListController
 			@RequestParam(value="limit", required=false) Integer limit,
 			@RequestParam(value="sortDir", required=false) Sort.Direction sortDir,
 			@RequestParam(value="sortPar", required=false) String sortPar,
-			HttpSession session
+			HttpSession session,
+			HttpServletResponse response, HttpServletRequest request
 	) {
 		
 		initSession(session);
@@ -93,7 +101,7 @@ public class ProductListController
 		mav.addObject("pageSize", curPage.getTotalPages());
 		mav.addObject("sortDir", sortDir);
 		mav.addObject("sortPar", sortPar);
-		
+				
 		
 		System.out.println(String.format("selected category = %s, page = %d, limit = %d", 
 				selectedCategory, page, limit));
@@ -106,45 +114,29 @@ public class ProductListController
 	
 	
 	
-	/**
-	 * View to Create new Product 
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/add", method = RequestMethod.GET)
-	public ModelAndView  addProductView() {
-		ModelAndView mav = new ModelAndView();
-		mav.setViewName("addProduct");
-		
-		mav.addObject("categoriesList", categoryRepository.findAll());
-		
-		return mav;
-	}
+	@RequestMapping(value = "/image", method = RequestMethod.GET)
+	public void getImage(HttpServletRequest request, HttpServletResponse response, 
+			@RequestParam(value="id", required=true) Long id) {
 
-	
-	
-	/**
-	 * on Create new Product
-	 */
-	@RequestMapping(value = "add", method = RequestMethod.POST)
-	public String addProduct(
-			@Valid @ModelAttribute("product") Product product,
-			BindingResult bindingResult, RedirectAttributes redir
-	) {
-		
-		//if invalid input then ask for reenter data
-		if (bindingResult.hasErrors()) {
-			return "addProduct";
-		}
+            Product product = productRepository.findOne(id);
 
-		//product.setCategory(categoryRepository.findByName(categoryName));
-		productRepository.save(product);
-		
-	    //redir.addFlashAttribute("catName", categoryName);
-	    redir.addFlashAttribute("product", product);
-	    return "redirect:/products";
-	}
-	
+            if (product != null && product.getImage() != null) {
+            	response.setContentType("image/jpeg, image/jpg, image/png, image/gif");	
+            	response.setContentLength(product.getImage().length);
+            	try {
+					response.getOutputStream().write(product.getImage());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+           	} else {
+            	try {
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+            }
+    }
+
 	
 	
 	/**
@@ -157,7 +149,7 @@ public class ProductListController
 
 		productRepository.delete(id);
 		
-		RedirectView redirect = new RedirectView("/555/products" + genRequestParameters(request, session));
+		RedirectView redirect = new RedirectView("../products" + genRequestParameters(request, session));
 	    redirect.setExposeModelAttributes(false);
 	    return redirect;
 	}
@@ -169,9 +161,10 @@ public class ProductListController
 	 */
 	@RequestMapping(value = "/update", method = RequestMethod.GET)
 	public ModelAndView updateProduct(@RequestParam(value="id", required=true) Long id) {
-		
 		//use Form for Create new Product with filled inputs
-		ModelAndView mav = addProductView();
+		ModelAndView mav = new ModelAndView();
+		mav.setViewName("addProduct");
+		
 		mav.addObject("product", productRepository.findOne(id));
 		
 		return mav;
